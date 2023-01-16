@@ -3,9 +3,10 @@
 # require 'nokogiri'
 
 # browser = Watir::Browser.new
-# browser.goto 'https://www.brewersassociation.org/directories/breweries/'
+# browser.goto 'https://www.g2.com/products/crisp/reviews#reviews'
 # parsed_page = Nokogiri::HTML(browser.html)
 
+# puts parsed_page
 # File.open("parsed.txt", "w") { |f| f.write "#{parsed_page}" }
 
 # puts "before xpath"
@@ -25,3 +26,17 @@ require 'open-uri'
 require 'net/http'
 require 'nokogiri'
 require 'httparty'
+
+url = "https://winerelease.com/"
+
+# headers = ""
+resp = HTTParty.get(url)
+html = resp.body
+
+doc = Nokogiri::HTML(html)
+winery_list = doc.css("td")
+winery = winery_list.css("a")
+
+winery.each do |name|
+  puts name
+end
