@@ -27,14 +27,32 @@ links_list.each do | website |
   if browser.text.include?("404")
     website_list << "Error 404"
   else
-    div = second_parsed_page.css('font')
+    div = second_parsed_page.css('font').first
+    puts "This is the DIV\n #{div}"
     links = div.css('a')
-    puts "Fetch completed. Found: #{links.first.attribute('href')}"
-    website_list << links.first.attribute('href')
+    final_link = ""
+
+
+  ## Bugs #1 - DIV is not the correct <font> on the page.
+  ## Bugs #2 - It catches too many hrefs.
+  ## Bug occurs because it finds several things that is not twitter, facebook or google, and thus changes the value of the final link over and over.
+
+    puts "Getting links....."
+    links.each do |link|
+      href = link.attribute('href').to_s
+      puts href.class
+
+      # if href.include?("google") || href.include?("twitter") || href.include?("facebook") || href.include?("")
+      #   puts "Link contained bad word. Skipping onto next link."
+      # else
+      #   website_list << href
+      #   # final_link = href
+      # end
+    end
   end
   browser.close
 
-  ## Pushing to CSV
+  # Pushing to CSV
   puts "Reading to CSV"
   CSV.open('wineries_websites.csv', 'w') do |csv|
   csv << headers
