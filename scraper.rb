@@ -26,6 +26,7 @@ require 'open-uri'
 require 'net/http'
 require 'nokogiri'
 require 'httparty'
+require 'csv'
 
 url = "https://winerelease.com/"
 
@@ -34,9 +35,24 @@ resp = HTTParty.get(url)
 html = resp.body
 
 doc = Nokogiri::HTML(html)
-winery_list = doc.css("td")
-winery = winery_list.css("a")
+table = doc.css("td")
+winery_links = table.css("a")
 
-winery.each do |name|
-  puts name
+winery_arr = []
+
+winery_links.each do |winery|
+  # puts winery.text
+  # puts winery.attribute("href")
+  winery_arr.push([winery.text, winery.attribute("href")])
+end
+
+puts winery_arr
+
+headers = ["Name", "Link"]
+CSV.open('wineries.csv', "w") do |csv|
+  csv << headers
+  winery_links.each do |winery|
+    winery_data = [winery.text, winery.attribute("href")]
+    csv << winery_data
+  end
 end
