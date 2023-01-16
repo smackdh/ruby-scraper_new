@@ -1,5 +1,4 @@
-# require 'watir'
-# require 'webdrivers'
+
 # require 'nokogiri'
 
 # browser = Watir::Browser.new
@@ -21,38 +20,49 @@
 # end
 
 # browser.close
+def first_page
+  require 'open-uri'
+  require 'net/http'
+  require 'nokogiri'
+  require 'httparty'
+  require 'csv'
 
-require 'open-uri'
-require 'net/http'
-require 'nokogiri'
-require 'httparty'
-require 'csv'
+  url = "https://winerelease.com/"
 
-url = "https://winerelease.com/"
+  # headers = ""
+  resp = HTTParty.get(url)
+  html = resp.body
 
-# headers = ""
-resp = HTTParty.get(url)
-html = resp.body
+  doc = Nokogiri::HTML(html)
+  table = doc.css('td')
+  winery_links = table.css('a')
 
-doc = Nokogiri::HTML(html)
-table = doc.css("td")
-winery_links = table.css("a")
 
-winery_arr = []
 
-winery_links.each do |winery|
-  # puts winery.text
-  # puts winery.attribute("href")
-  winery_arr.push([winery.text, winery.attribute("href")])
-end
-
-puts winery_arr
-
-headers = ["Name", "Link"]
-CSV.open('wineries.csv', "w") do |csv|
-  csv << headers
-  winery_links.each do |winery|
-    winery_data = [winery.text, winery.attribute("href")]
-    csv << winery_data
+  headers = ["Name", "Link"]
+  CSV.open('wineries.csv', 'w') do |csv|
+    csv << headers
+    winery_links.each do |winery|
+      url = winery.attribute("href")
+      winery_data = [winery.text, url]
+      csv << winery_data
+    end
   end
 end
+
+
+def web_site
+  require 'watir'
+  require 'webdrivers'
+  browser = Watir::Browser.new
+  browser.goto ("https://www.winerelease.com/WineryInfo/Filomena_wine_releases.html")
+  second_parsed_page = Nokogiri::HTML(browser.html)
+  File.open('parsed.txt', 'w') { |f| f.write "#{second_parsed_page}" }
+  div = second_parsed_page.css("font")
+  links = div.css("a")
+
+  website = links.first.attribute("href")
+  puts website
+end
+
+web_site
